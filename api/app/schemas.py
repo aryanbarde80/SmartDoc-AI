@@ -19,6 +19,7 @@ class SourceChunk(BaseModel):
     rank: int
     score: float
     content: str
+    page: Optional[int] = None
 
 
 class AskResponse(BaseModel):
