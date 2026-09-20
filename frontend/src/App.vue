@@ -1,6 +1,18 @@
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import { askQuestion, fetchInsights, uploadPdf } from './lib/api'
+
+marked.setOptions({
+  gfm: true,
+  breaks: true
+})
+
+function renderMarkdown(content) {
+  if (!content) return ''
+  return DOMPurify.sanitize(marked.parse(String(content)))
+}
 
 const activeTab = ref('chat')
 const selectedFile = ref(null)
@@ -230,7 +242,7 @@ onMounted(loadInsights)
                 <div class="message-avatar" :class="message.role === 'assistant' ? 'ai-avatar' : 'user-avatar'">{{ message.role === 'assistant' ? '✦' : 'AB' }}</div>
                 <div class="message-body">
                   <div class="message-meta"><strong>{{ message.role === 'assistant' ? 'SmartDoc AI' : 'You' }}</strong><span>{{ message.role === 'assistant' ? 'Source-grounded response' : 'Question' }}</span></div>
-                  <p>{{ message.content }}</p>
+                  <div class="formatted-content" v-html="renderMarkdown(message.content)"></div>
                   <div v-if="message.sources?.length" class="sources">
                     <div class="sources-label">Relevant passages <span>{{ message.sources.length }}</span></div>
                     <details v-for="source in message.sources" :key="`${index}-${source.rank}`" class="source-item">
